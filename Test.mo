@@ -1,6 +1,7 @@
 /* Vaneeckhaute C. (2014): NRM-AD model 
    Dynamic anaerobic digestion model including three-phase physicochemical and biological reactions. 
    Should be used with PhreeqC reduced database: AD-PCB. 
+Aanpassig in code
 */
 
 // nog toevoegen in definitions de biological SO4min2 en Kplus
