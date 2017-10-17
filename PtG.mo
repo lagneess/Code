@@ -11,11 +11,11 @@
 #include "Definitions.mo"
 //#include "Quantities.mo"
 
-block Test
+block PtG
 
   public
     
-    parameter Integer FileID = 1; // Needed for PhreeqC function 
+  parameter Integer FileID = 1; // Needed for PhreeqC function 
 
 
 // A. INPUTS, OUTPUTS AND OPERATION 
@@ -987,4 +987,4 @@ block Test
 - Visual Minteq (2014) Vminteq31.  
 */ 
 
-end Test; 
+end PtG; 
