@@ -928,14 +928,15 @@ block PtG
  // 9. MEASUREMENTS 
     
     // Partial pressures and total pressure in the gas phase (atm)
-       p = C_gas * R_Gas * T_op;
+       p = C_gas * R_Gas * T_op; // C_gas = n_gas / V_gas
        p_h2o = 0.0313 * exp(5290 * ((1/T_op) - (1/298.15))); // cfr. ADM1
        p_headspace = sum(p) + p_h2o;   
        p_pc = p / p(sum) * 100; 
  
    
     // Gas flow (m3/d) 
-       Q_gas = if (p_headspace  <= p_atm) then 0.0 else ((p_headspace - p_atm)^0.5 * K_p);
+     //  Q_gas = if (p_headspace  <= p_atm) then 0.0 else ((p_headspace - p_atm)^0.5 * K_p);
+       Q_gas = p_headspace * V_gas / p_atm; // [atm] * [m3] / [atm]
        QN_gas  = Q_gas  * p_headspace * (1.0 / p_atm);
    
   
