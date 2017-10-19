@@ -931,7 +931,7 @@ block PtG
        p = C_gas * R_Gas * T_op;
        p_h2o = 0.0313 * exp(5290 * ((1/T_op) - (1/298.15))); // cfr. ADM1
        p_headspace = sum(p) + p_h2o;   
-       p_pc = p * 100; 
+       p_pc = p / p(sum) * 100; 
  
    
     // Gas flow (m3/d) 
