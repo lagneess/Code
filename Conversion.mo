@@ -10,7 +10,7 @@
  * warranty of design, merchantability and fitness for a particular purpose.
  *
  * $Revision: 2$
- * $Date: 29-11-2017$
+ * $Date: 29. november 2017$
  *
  ******************************************************************************/
 
@@ -131,7 +131,7 @@ partial block ConversionModelBaseADM1
 
   public  
   
-    input CelsiusTemperature T_op = 35 "Temperature" annotation (terminal = "in2", manip = true, group = "Operation");
+    input CelsiusTemperature T_op = 38 "Temperature" annotation (terminal = "in2", manip = true, group = "Operation");
 
     // Carbon content
     parameter Real C_aa (unit = "mol/gCOD") = 0.03 "Carbon content of amino acids" annotation (group = "Stoichiometry");
@@ -179,7 +179,8 @@ partial block ConversionModelBaseADM1
     parameter Real Y_ac (unit = "-") = 0.05 "Yield of biomass on uptake of acetate" annotation (group = "Stoichiometry");
     parameter Real Y_c4 (unit = "-") = 0.06 "Yield of biomass on uptake of valerate or butyrate" annotation (group = "Stoichiometry");
     parameter Real Y_fa (unit = "-") = 0.06 "Yield of biomass on uptake of long chain fatty acids" annotation (group = "Stoichiometry");
-    parameter Real Y_h2 (unit = "-") = 0.06 "Yield of biomass on uptake of elemental hydrogen" annotation (group = "Stoichiometry");
+    parameter Real Y_h2 (unit = "-") = 0.06 "Yield of biomass HM on uptake of elemental hydrogen" annotation (group = "Stoichiometry");
+    parameter Real Y_h2_ha (unit = "-") = 0.06 "Yield of biomass HA on uptake of elemental hydrogen" annotation (group = "Stoichiometry");
     parameter Real Y_pro (unit = "-") = 0.04 "Yield of biomass on uptake of propionate" annotation (group = "Stoichiometry");
     parameter Real Y_su (unit = "-") = 0.1 "Yield of biomass on uptake of monosaccharides" annotation (group = "Stoichiometry");
 
@@ -211,7 +212,8 @@ partial block ConversionModelBaseADM1
     parameter DecayCoefficient kdec_xac = 0.02 "Decay rate for acetate degrading organisms" annotation (group = "Kinetics");
     parameter DecayCoefficient kdec_xc4 = 0.02 "Decay rate for butyrate and valerate degrading organisms" annotation (group = "Kinetics");
     parameter DecayCoefficient kdec_xfa = 0.02 "Decay rate for long chain fatty acid degrading organisms" annotation (group = "Kinetics");
-    parameter DecayCoefficient kdec_xh2 = 0.02 "Decay rate for hydrogen degrading organisms" annotation (group = "Kinetics");
+    parameter DecayCoefficient kdec_xh2 = 0.02 "Decay rate for HM organisms" annotation (group = "Kinetics");
+    parameter DecayCoefficient kdec_xh2 = 0.02 "Decay rate for HA organisms" annotation (group = "Kinetics");
     parameter DecayCoefficient kdec_xpro = 0.02 "Decay rate for propionate degrading organisms" annotation (group = "Kinetics");
     parameter DecayCoefficient kdec_xsu = 0.02 "Decay rate for monosaccharide degrading organisms" annotation (group = "Kinetics");
     parameter Real kdis (unit = "1/d") = 0.5 "Complex particulate disintegration first order rate constant" annotation (group = "Kinetics");
@@ -229,14 +231,16 @@ partial block ConversionModelBaseADM1
     parameter Real km_ac (unit = "1/d") = 8.0 "Maximum uptake rate for acetate degrading organisms" annotation (group = "Kinetics");
     parameter Real km_c4 (unit = "1/d") = 20.0 "Maximum uptake rate for c4 degrading organisms" annotation (group = "Kinetics");
     parameter Real km_fa (unit = "1/d") = 6.0 "Maximum uptake rate for long chain fatty acid degrading organisms" annotation (group = "Kinetics");
-    parameter Real km_h2 (unit = "1/d") = 35.0 "Maximum uptake rate for hydrogen degrading organisms" annotation (group = "Kinetics");
+    parameter Real km_h2 (unit = "1/d") = 35.0 "Maximum uptake rate for HM organisms" annotation (group = "Kinetics");
+    parameter Real km_h2_ha (unit = "1/d") = 35.0 "Maximum uptake rate for HA organisms" annotation (group = "Kinetics");
     parameter Real km_pro (unit = "1/d") = 13.0 "Maximum uptake rate for propionate degrading organisms" annotation (group = "Kinetics");
     parameter Real km_su (unit = "1/d") = 30.0 "Maximum uptake rate for monosaccharide degrading organisms" annotation (group = "Kinetics");
     parameter Real Ks_aa (unit = "kg/m3") = 0.3 "Half saturation constant for amino acid degradation" annotation (group = "Kinetics");
     parameter Real Ks_ac (unit = "kg/m3") = 0.15 "Half saturation constant for acetate degradation" annotation (group = "Kinetics");
     parameter Real Ks_c4 (unit = "kg/m3") = 0.2 "Half saturation constant for butyrate and valerate degradation" annotation (group = "Kinetics");
     parameter Real Ks_fa (unit = "kg/m3") = 0.4 "Half saturation constant for long chain fatty acids degradation" annotation (group = "Kinetics");
-    parameter Real Ks_h2 (unit = "kg/m3") = 7E-006 "Half saturation constant for uptake of hydrogen" annotation (group = "Kinetics");
+    parameter Real Ks_h2 (unit = "kg/m3") = 7E-006 "Half saturation constant for uptake of hydrogen by HM" annotation (group = "Kinetics");
+    parameter Real Ks_ha (unit = "kg/m3") = 7E-006 "Half saturation constant for uptake of hydrogen by HA" annotation (group = "Kinetics");
     parameter Real Ks_pro (unit = "kg/m3") = 0.1 "Half saturation constant for propionate degradation" annotation (group = "Kinetics");
     parameter Real Ks_su (unit = "kg/m3") = 0.5 "Half saturation constant for monosaccharide degradation" annotation (group = "Kinetics");
     parameter MolConcentration Ks_IN = 0.0001 "Inorganic nitrogen concentration at which growth ceases" annotation (group = "Kinetics");
@@ -318,7 +322,7 @@ partial block ConversionModelBaseADM1
     Stoichiometry[ADM1.TReactions.decay_fa, ADM1.TComponents.X_fa] = -1;
     Stoichiometry[ADM1.TReactions.decay_fa, ADM1.TComponents.S_IC] = C_biom - C_Xc;
     Stoichiometry[ADM1.TReactions.decay_fa, ADM1.TComponents.S_INN] = N_biom - N_Xc;
-    // process 5: decay of hydrogen degrading organisms
+    // process 5: decay of HM organisms
     Stoichiometry[ADM1.TReactions.decay_h2, ADM1.TComponents.X_c] = 1;
     Stoichiometry[ADM1.TReactions.decay_h2, ADM1.TComponents.X_h2] = -1;
     Stoichiometry[ADM1.TReactions.decay_h2, ADM1.TComponents.S_IC] = C_biom - C_Xc;
@@ -385,7 +389,7 @@ partial block ConversionModelBaseADM1
     Stoichiometry[ADM1.TReactions.uptake_fa, ADM1.TComponents.S_INN] = -N_biom * Y_fa;
     Stoichiometry[ADM1.TReactions.uptake_fa, ADM1.TComponents.S_fa] = -1;
     Stoichiometry[ADM1.TReactions.uptake_fa, ADM1.TComponents.S_IC] = C_fa - (1-Y_fa) * 0.7 * C_ac - Y_fa * C_biom;
-    // process 16: uptake of h2
+    // process 16: uptake of h2 by HM
     Stoichiometry[ADM1.TReactions.uptake_h2, ADM1.TComponents.S_h2] = -1;
     Stoichiometry[ADM1.TReactions.uptake_h2, ADM1.TComponents.X_h2] = Y_h2;
     Stoichiometry[ADM1.TReactions.uptake_h2, ADM1.TComponents.S_INN] = -N_biom * Y_h2;
@@ -416,10 +420,21 @@ partial block ConversionModelBaseADM1
     Stoichiometry[ADM1.TReactions.uptake_va, ADM1.TComponents.S_pro] = (1-Y_c4)*0.54;
     Stoichiometry[ADM1.TReactions.uptake_va, ADM1.TComponents.S_IC] = C_va - (1-Y_c4)*0.54 * C_pro - Y_c4 * C_biom - (1-Y_c4) * 0.31 * C_ac;
     // Processes 20-26 are reserved for updating to the DE implementation if needed.
+    //// process 20: decay of HA organisms
+    Stoichiometry[ADM1.TReactions.decay_h2_ha, ADM1.TComponents.X_c] = 1;
+    Stoichiometry[ADM1.TReactions.decay_h2_ha, ADM1.TComponents.X_h2] = -1;
+    Stoichiometry[ADM1.TReactions.decay_h2_ha, ADM1.TComponents.S_IC] = C_biom - C_Xc;
+    Stoichiometry[ADM1.TReactions.decay_h2_ha, ADM1.TComponents.S_INN] = N_biom - N_Xc;
+    // process 22: uptake of h2 by HA
+    Stoichiometry[ADM1.TReactions.uptake_h2_ha, ADM1.TComponents.S_h2] = -1;
+    Stoichiometry[ADM1.TReactions.uptake_h2_ha, ADM1.TComponents.X_h2] = Y_h2_ha;
+    Stoichiometry[ADM1.TReactions.uptake_h2_ha, ADM1.TComponents.S_INN] = -N_biom * Y_h2_ha;
+    Stoichiometry[ADM1.TReactions.uptake_h2_ha, ADM1.TComponents.S_ch4] = 1 -Y_h2_ha;
+    Stoichiometry[ADM1.TReactions.uptake_h2_ha, ADM1.TComponents.S_ac] = -Y_h2_ha * C_biom - (1 - Y_h2_ha) * C_ac;
     // process 27: transfer of CO2
     Stoichiometry[ADM1.TReactions.transfer_co2, ADM1.TComponents.S_IC] = -1;
     Stoichiometry[ADM1.TReactions.transfer_co2, ADM1.TComponents.S_co2_gas] = 1;
-    // process 28: transfere of H2
+    // process 28: transfer of H2
     Stoichiometry[ADM1.TReactions.transfer_h2, ADM1.TComponents.S_h2] = -1;
     Stoichiometry[ADM1.TReactions.transfer_h2, ADM1.TComponents.S_h2_gas] = 1; 
     // process 29: transfer of CH4
@@ -455,6 +470,7 @@ partial block ConversionModelBaseADM1
     Kinetics[ADM1.TReactions.decay_c4] = kdec_xc4 * C[ADM1.TComponents.X_c4];
     Kinetics[ADM1.TReactions.decay_fa] = kdec_xfa * C[ADM1.TComponents.X_fa];
     Kinetics[ADM1.TReactions.decay_h2] = kdec_xh2 * C[ADM1.TComponents.X_h2];
+    Kinetics[ADM1.TReactions.decay_h2_ha] = kdec_xh2_ha * C[ADM1.TComponents.X_h2_ha];
     Kinetics[ADM1.TReactions.decay_pro] = kdec_xpro * C[ADM1.TComponents.X_pro];
     Kinetics[ADM1.TReactions.decay_su] = kdec_xsu * C[ADM1.TComponents.X_su];
     Kinetics[ADM1.TReactions.dis] = kdis * C[ADM1.TComponents.X_c];
@@ -466,6 +482,7 @@ partial block ConversionModelBaseADM1
     Kinetics[ADM1.TReactions.uptake_bu] = km_c4 * C[ADM1.TComponents.X_c4] * C[ADM1.TComponents.S_bu] / (Ks_c4 + C[ADM1.TComponents.S_bu]) * C[ADM1.TComponents.S_bu] / (C[ADM1.TComponents.S_bu] + C[ADM1.TComponents.S_va] + 0.000001) * I_pH_bac * I_h2_c4 * I_NH_limit;
     Kinetics[ADM1.TReactions.uptake_fa] = km_fa * C[ADM1.TComponents.X_fa] * C[ADM1.TComponents.S_fa] / (Ks_fa + C[ADM1.TComponents.S_fa]) * I_pH_bac * I_h2_fa * I_NH_limit;
     Kinetics[ADM1.TReactions.uptake_h2] = km_h2 * C[ADM1.TComponents.X_h2] * C_H2 / (Ks_h2 + C_H2) * I_pH_h2 * I_NH_limit;
+    Kinetics[ADM1.TReactions.uptake_h2_ha] = km_h2_ha * C[ADM1.TComponents.X_h2_ha] * C_H2 / (Ks_h2_ha + C_H2) * I_pH_h2 * I_NH_limit;
     Kinetics[ADM1.TReactions.uptake_pro] = km_pro * C[ADM1.TComponents.X_pro] * C[ADM1.TComponents.S_pro] / (Ks_pro + C[ADM1.TComponents.S_pro]) * I_pH_bac * I_h2_pro * I_NH_limit;
     Kinetics[ADM1.TReactions.uptake_su] = km_su * C[ADM1.TComponents.X_su] * C[ADM1.TComponents.S_su] / (Ks_su + C[ADM1.TComponents.S_su]) * I_pH_bac * I_NH_limit;
     Kinetics[ADM1.TReactions.uptake_va] = km_c4 * C[ADM1.TComponents.X_c4] * C[ADM1.TComponents.S_va] / (Ks_c4 + C[ADM1.TComponents.S_va]) * C[ADM1.TComponents.S_va] / (C[ADM1.TComponents.S_va] + C[ADM1.TComponents.S_bu] + 0.000001) * I_pH_bac * I_h2_c4 * I_NH_limit;
@@ -512,7 +529,7 @@ partial block ConversionModelBaseADM1
       km_fa, C[ADM1.TComponents.S_fa], Ks_fa, C[ADM1.TComponents.X_fa], I_pH_bac, I_NH_limit, KI_h2_fa, Y_c4, km_c4,
       C[ADM1.TComponents.S_va], Ks_c4, C[ADM1.TComponents.X_c4], C[ADM1.TComponents.S_bu], KI_h2_c4, Y_pro, km_pro,
       C[ADM1.TComponents.S_pro], Ks_pro, C[ADM1.TComponents.X_pro], KI_h2_pro, km_h2, Ks_h2, C[ADM1.TComponents.X_h2],
-      I_pH_h2, kLa, KH_h2, p_H2);
+      km_h2_ha, Ks_h2_ha, C[ADM1.TComponents.X_h2_ha], I_pH_h2, kLa, KH_h2, p_H2);
 
     // Originally (MSL implementation), for all components but: S_h2, S_an, S_cat, S_ch4_gas, S_co2_gas, S_h2_gas
     // Can be used for S_an, S_cat, because ConversionPerComponent = 0 (Stochiometry is = 0)
@@ -535,7 +552,7 @@ partial block ConversionModelBaseADM1
 
     //Q_Gas =  parameters.R * parameters.help_T / (parameters.P_atm - parameters.p_h2o ) * parameters.V_liq * (state.GasKinetics[transfer_ch4] / 64 + state.GasKinetics[transfer_co2] + state.GasKinetics[transfer_h2] / 16); 
     Q_Gas = if (abs((P_Headspace - P_atm) * K_p) <= 1e-008) then 0.0 else ((P_Headspace - P_atm) * K_p);
-    QN_Gas  = Q_Gas  * P_Headspace * (1.0 / P_atm);
+    QN_Gas  = P_Headspace * (1.0 / P_atm) * VLiq;
   
 end ConversionModelBaseADM1;
 
