@@ -10,7 +10,7 @@
  * warranty of design, merchantability and fitness for a particular purpose.
  *
  * $Revision: 1$
- * $Date: 6. marts 2014 16:42:13$
+ * $Date: 29. november 2017$
  *
  ******************************************************************************/
  
@@ -123,6 +123,18 @@ algorithm
   Result := km_h2 * S_H / (KS_h2 + S_H) * X_h2 * I_pH_h2 * I_IN_lim;
 end h2_Uptake;
 
+function h2_ha_Uptake "Uptake of hydrogen (S_H_ini introduced to avoid passing too many arguments; S_H_ini is the S_H passed by the function call"
+  input Real km_h2_ha;
+  input Real S_H;
+  input Real KS_h2_ha;
+  input Real X_h2_ha;
+  input Real I_pH_h2;
+  input Real I_IN_lim;
+  output Real Result;
+algorithm
+  Result := km_h2_ha * S_H / (KS_h2_ha + S_H) * X_h2_ha * I_pH_h2 * I_IN_lim;
+end h2_ha_Uptake;
+
 function Transfer2Gas "Transfer to gas-phase"
   input Real kla;
   input Real S_H;
@@ -209,6 +221,19 @@ algorithm
   Result := km_h2 * X_h2 * I_pH_h2 * I_IN_lim * (1 / (KS_h2 + S_H) - S_H / (KS_h2 + S_H) / (KS_h2 + S_H));
 end D_h2_Uptake;
 
+function D_h2_ha_Uptake
+  input Real km_h2_ha;
+  input Real X_h2_ha;
+  input Real I_pH_h2;
+  input Real I_IN_lim;
+  input Real S_H;
+  input Real KS_h2_ha;
+  output Real Result;
+algorithm
+  Result := km_h2_ha * X_h2_ha * I_pH_h2 * I_IN_lim * (1 / (KS_h2_ha + S_H) - S_H / (KS_h2_ha + S_H) / (KS_h2_ha + S_H));
+end D_h2_ha_Uptake;
+
+
 // Functions needed for the Newton Raphson procedure
 
 function f_h2 "Function evaluation of f(h2)"
@@ -246,6 +271,9 @@ function f_h2 "Function evaluation of f(h2)"
   input Real km_h2;
   input Real KS_h2;
   input Real X_h2;
+  input Real km_h2_ha;
+  input Real KS_h2_ha;
+  input Real X_h2_ha;
   input Real I_pH_h2;
   input Real kla;
   input Real KH_h2;
@@ -259,7 +287,8 @@ algorithm
             + Va_Uptake(Y_c4, km_c4, S_va, K_S_c4, X_c4, S_bu,I_pH_aa, I_IN_lim, S_H, K_I_h2_c4) 
             + Bu_Uptake(Y_c4, km_c4, S_bu, K_S_c4, X_c4, S_va, I_pH_aa, I_IN_lim, S_H, K_I_h2_c4)
             + Pro_Uptake(Y_pro, km_pro, S_pro, K_S_pro, X_pro, I_pH_aa, I_IN_lim, S_H, K_I_h2_pro)
-            - h2_Uptake(km_h2, S_H, KS_h2, X_h2, I_pH_h2, I_IN_lim) 
+            - h2_Uptake(km_h2, S_H, KS_h2, X_h2, I_pH_h2, I_IN_lim)
+            - h2_ha_Uptake(km_h2_ha, S_H, KS_h2_ha, X_h2_ha, I_pH_h2, I_IN_lim)
             - Transfer2Gas(kla, S_H, KH_h2, p_gas_h2);
 end f_h2;
 
@@ -291,6 +320,9 @@ function D_f_h2 "f'(h2)"
   input Real km_h2;
   input Real KS_h2;
   input Real X_h2;
+  input Real km_h2_ha;
+  input Real KS_h2_ha;
+  input Real X_h2_ha;
   input Real I_pH_h2;
   input Real kla;
   output Real Result;
@@ -300,7 +332,8 @@ algorithm
             + D_Va_Uptake(Y_c4, km_c4, S_va, K_S_c4, X_c4, S_bu, I_pH_aa, I_IN_lim, S_H, K_I_h2_c4)
             + D_Bu_Uptake(Y_c4, km_c4, S_bu, K_S_c4, X_c4, S_va, I_pH_aa, I_IN_lim, S_H, K_I_h2_c4)
             + D_Pro_Uptake(Y_pro, km_pro, S_pro, K_S_pro, X_pro, I_pH_aa, I_IN_lim, S_H, K_I_h2_pro)
-            - D_h2_Uptake(km_h2, X_h2, I_pH_h2, I_IN_lim, S_H,KS_h2) 
+            - D_h2_Uptake(km_h2, X_h2, I_pH_h2, I_IN_lim, S_H, KS_h2) 
+            - D_h2_ha_Uptake(km_h2_ha, X_h2_ha, I_pH_h2, I_IN_lim, S_H, KS_h2_ha) 
             - kla;
 end D_f_h2;
 
@@ -339,6 +372,9 @@ function Compute
   input Real km_h2;
   input Real KS_h2;
   input Real X_h2;
+  input Real km_h2_ha;
+  input Real KS_h2_ha;
+  input Real X_h2_ha;
   input Real I_pH_h2;
   input Real kla;
   input Real KH_h2;
@@ -354,10 +390,11 @@ algorithm
   S_H0 := S_H_ini;
   while Continue loop
     f_SH := f_h2(Q_in, V_liq, S_H_in, S_H0, Y_su, f_h2_su, rho_su, Y_aa, f_h2_aa, rho_aa, Y_fa, km_fa, S_fa, K_S_fa, X_fa, I_pH_aa, I_IN_lim, K_I_h2_fa,
-                 Y_c4, km_c4, S_va, K_S_c4, X_c4, S_bu, K_I_h2_c4, Y_pro, km_pro, S_pro, K_S_pro, X_pro, K_I_h2_pro, km_h2, KS_h2, X_h2, I_pH_h2,
-                 kla, KH_h2, p_gas_h2);
+                 Y_c4, km_c4, S_va, K_S_c4, X_c4, S_bu, K_I_h2_c4, Y_pro, km_pro, S_pro, K_S_pro, X_pro, K_I_h2_pro, km_h2, KS_h2, X_h2,
+                 km_h2_ha, KS_h2_ha, X_h2_ha, I_pH_h2, kla, KH_h2, p_gas_h2);
     S_H := S_H0 - f_SH / D_f_h2(Q_in, V_liq, Y_fa, km_fa, S_fa, K_S_fa, X_fa, I_pH_aa, I_IN_lim, S_H0, K_I_h2_fa, Y_c4, km_c4, S_va, K_S_c4, X_c4,
-                                S_bu, K_I_h2_c4, Y_pro, km_pro, S_pro, K_S_pro, X_pro, K_I_h2_pro, km_h2, KS_h2, X_h2, I_pH_h2, kla);
+                                S_bu, K_I_h2_c4, Y_pro, km_pro, S_pro, K_S_pro, X_pro, K_I_h2_pro, km_h2, KS_h2, X_h2, km_h2_ha, KS_h2_ha, X_h2_ha,
+                                I_pH_h2, kla);
     if (S_H <= 0) then
       S_H := 1e-12;
     end if;
